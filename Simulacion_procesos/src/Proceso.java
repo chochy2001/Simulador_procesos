@@ -1,11 +1,11 @@
 import java.util.Random;
 
 public class Proceso {
-    private String nombre;
-    private int id;
-    private int instruccionesTotales;
+    private final String nombre;
+    private final int id;
+    private final int instruccionesTotales;
     private int instruccionesEjecutadas = 0;
-    private int memoriaAsignada;
+    private final int memoriaAsignada;
 
     public Proceso(String nombre) {
         this.nombre = nombre;
@@ -20,25 +20,16 @@ public class Proceso {
         return nombre;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
 
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public int getInstruccionesTotales() {
         return instruccionesTotales;
     }
 
-    public void setInstruccionesTotales(int instruccionesTotales) {
-        this.instruccionesTotales = instruccionesTotales;
-    }
 
     public int getInstruccionesEjecutadas() {
         return instruccionesEjecutadas;
@@ -52,8 +43,5 @@ public class Proceso {
         return memoriaAsignada;
     }
 
-    public void setMemoriaAsignada(int memoriaAsignada) {
-        this.memoriaAsignada = memoriaAsignada;
-    }
 }
 

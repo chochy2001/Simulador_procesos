@@ -3,17 +3,17 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Simulador {
-    private LinkedList<Proceso> colaDeProcesos = new LinkedList<>();
-    private LinkedList<Proceso> colaDeES = new LinkedList<>();
-    private LinkedList<Proceso> colaDeInterrupciones = new LinkedList<>();
-    private LinkedList<Proceso> procesosEliminados = new LinkedList<>();
-    private LinkedList<Proceso> procesosFinalizados = new LinkedList<>();
-    private int memoriaTotal = 2048;
+    private final LinkedList<Proceso> colaDeProcesos = new LinkedList<>();
+    private final LinkedList<Proceso> colaDeES = new LinkedList<>();
+    private final LinkedList<Proceso> colaDeInterrupciones = new LinkedList<>();
+    private final LinkedList<Proceso> procesosEliminados = new LinkedList<>();
+    private final LinkedList<Proceso> procesosFinalizados = new LinkedList<>();
     private int memoriaUsada = 0;
-    private Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner = new Scanner(System.in);
 
     public void mostrarMenu() {
-        while (true) {
+        boolean continuar = true;
+        while (continuar) {
             System.out.println("Seleccione una opción:");
             System.out.println("1. Crear Proceso nuevo");
             System.out.println("2. Ver proceso activo");
@@ -66,6 +66,7 @@ public class Simulador {
                     break;
                 case 12:
                     salirDelPrograma();
+                    continuar = false;
                     break;
                 default:
                     System.out.println("Opción no válida. Intente nuevamente.");
@@ -229,11 +230,10 @@ public class Simulador {
 
         Proceso procesoActivo = colaDeProcesos.peekFirst(); // Accedemos al primer proceso de la cola, sin eliminarlo.
 
-        int instruccionesARealizar = 5;
-        if (procesoActivo.getInstruccionesTotales() - procesoActivo.getInstruccionesEjecutadas() < 5) {
-            // Si hay menos de 5 instrucciones por ejecutar, ajustar instruccionesARealizar.
-            instruccionesARealizar = procesoActivo.getInstruccionesTotales() - procesoActivo.getInstruccionesEjecutadas();
-        }
+        // Si hay menos de 5 instrucciones por ejecutar, ajustar instruccionesARealizar.
+        // Math.min toma 2 argumentos y regresa el menor de los dos,
+        // en este caso si quedan menos que 5 son las que se ejecutarán
+        int instruccionesARealizar = Math.min(procesoActivo.getInstruccionesTotales() - procesoActivo.getInstruccionesEjecutadas(), 5);
 
         // Restar las instrucciones ejecutadas del total.
         procesoActivo.setInstruccionesEjecutadas(procesoActivo.getInstruccionesEjecutadas() + instruccionesARealizar);
@@ -256,6 +256,7 @@ public class Simulador {
         Proceso nuevoProceso = new Proceso(nombre);
 
         // Checar si hay memoria suficiente para el nuevo proceso.
+        int memoriaTotal = 2048;
         if ((memoriaUsada + nuevoProceso.getMemoriaAsignada()) <= memoriaTotal) {
             colaDeProcesos.addLast(nuevoProceso);  // Agregar el proceso a la cola de procesos.
             memoriaUsada += nuevoProceso.getMemoriaAsignada();  // Incrementar la memoria usada.
@@ -321,67 +322,4 @@ public class Simulador {
         System.exit(0);
     }
 
-    public LinkedList<Proceso> getColaDeProcesos() {
-        return colaDeProcesos;
-    }
-
-    public void setColaDeProcesos(LinkedList<Proceso> colaDeProcesos) {
-        this.colaDeProcesos = colaDeProcesos;
-    }
-
-    public LinkedList<Proceso> getColaDeES() {
-        return colaDeES;
-    }
-
-    public void setColaDeES(LinkedList<Proceso> colaDeES) {
-        this.colaDeES = colaDeES;
-    }
-
-    public LinkedList<Proceso> getColaDeInterrupciones() {
-        return colaDeInterrupciones;
-    }
-
-    public void setColaDeInterrupciones(LinkedList<Proceso> colaDeInterrupciones) {
-        this.colaDeInterrupciones = colaDeInterrupciones;
-    }
-
-    public LinkedList<Proceso> getProcesosEliminados() {
-        return procesosEliminados;
-    }
-
-    public void setProcesosEliminados(LinkedList<Proceso> procesosEliminados) {
-        this.procesosEliminados = procesosEliminados;
-    }
-
-    public LinkedList<Proceso> getProcesosFinalizados() {
-        return procesosFinalizados;
-    }
-
-    public void setProcesosFinalizados(LinkedList<Proceso> procesosFinalizados) {
-        this.procesosFinalizados = procesosFinalizados;
-    }
-
-    public int getMemoriaTotal() {
-        return memoriaTotal;
-    }
-
-    public void setMemoriaTotal(int memoriaTotal) {
-        this.memoriaTotal = memoriaTotal;
-    }
-
-    public int getMemoriaUsada() {
-        return memoriaUsada;
-    }
-
-    public void setMemoriaUsada(int memoriaUsada) {
-        this.memoriaUsada = memoriaUsada;
-    }
-
-    public Scanner getScanner() {
-        return scanner;
-    }
-
-    public void setScanner(Scanner scanner) {
-        this.scanner = scanner;
-    }
 }
