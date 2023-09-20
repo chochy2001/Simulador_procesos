@@ -19,8 +19,14 @@ public class Simulador {
             System.out.println("2. Ver proceso activo");
             System.out.println("3. Ejecutar proceso actual");
             System.out.println("4. Pasar al proceso siguiente");
-            // ... [Otras opciones]
-            System.out.println("10. Salir del programa");
+            System.out.println("5. Ejecutar entrada y salida");
+            System.out.println("6. Ejecutar interrupción");
+            System.out.println("7. Matar proceso actual");
+            System.out.println("8. Imprimir lista de procesos preparados (detalle)");
+            System.out.println("9. Imprimir lista de E/S");
+            System.out.println("10. Imprimir procesos pendientes de E/S");
+            System.out.println("11. Ver estado actual del sistema");
+            System.out.println("12. Salir del programa");
 
             int seleccion = scanner.nextInt();
 
@@ -31,17 +37,159 @@ public class Simulador {
                 case 2:
                     verProcesoActivo();
                     break;
-                case 3: 
+                case 3:
                     ejecutarProcesoActual();
+                    break;
                 case 4:
                     pasarAlProcesoSiguiente();
-                // ... [Otras opciones]
+                    break;
+                case 5:
+                    ejecutarEntradaYSalida();
+                    break;
+                case 6:
+                    ejecutarInterrupcion();
+                    break;
+                case 7:
+                    matarProcesoActual();
+                    break;
+                case 8:
+                    imprimirListaProcesosPreparados();
+                    break;
+                case 9:
+                    imprimirListaES();
+                    break;
                 case 10:
+                    imprimirProcesosPendientesInterrupcion();
+                    break;
+                case 11:
+                    verEstadoActualSistema();
+                    break;
+                case 12:
                     salirDelPrograma();
                     break;
+                default:
+                    System.out.println("Opción no válida. Intente nuevamente.");
             }
         }
     }
+
+
+    public void verEstadoActualSistema() {
+        // Número de procesos en cola de preparados
+        System.out.println("Número de procesos en cola de preparados: " + colaDeProcesos.size());
+
+        // Número de procesos en cola de E/S
+        System.out.println("Número de procesos en cola de E/S: " + colaDeES.size());
+
+        // Mostrar lista de procesos pendientes de ejecutar interrupción
+        imprimirProcesosPendientesInterrupcion();
+
+        // Lista con el nombre de los procesos finalizados exitosamente
+        System.out.println("Procesos finalizados exitosamente:");
+        if (procesosFinalizados.isEmpty()) {
+            System.out.println("No hay procesos finalizados exitosamente.");
+        } else {
+            for (Proceso proceso : procesosFinalizados) {
+                System.out.println("- " + proceso.getNombre());
+            }
+        }
+
+        // Lista de procesos finalizados antes de tiempo (eliminados)
+        System.out.println("Procesos finalizados antes de tiempo (eliminados):");
+        if (procesosEliminados.isEmpty()) {
+            System.out.println("No hay procesos eliminados.");
+        } else {
+            for (Proceso proceso : procesosEliminados) {
+                System.out.println("- " + proceso.getNombre());
+            }
+        }
+    }
+
+
+
+    public void imprimirProcesosPendientesInterrupcion() {
+        if (colaDeInterrupciones.isEmpty()) {
+            System.out.println("No hay procesos pendientes de ejecutar interrupción.");
+            return;
+        }
+
+        System.out.println("Lista de procesos pendientes de interrupción:");
+        for (Proceso proceso : colaDeInterrupciones) {
+            System.out.println("-----------------------------------");
+            System.out.println("Nombre del proceso: " + proceso.getNombre());
+            System.out.println("ID del proceso: " + proceso.getId());
+            System.out.println("Instrucciones pendientes: " + (proceso.getInstruccionesTotales() - proceso.getInstruccionesEjecutadas()));
+            System.out.println("Dirección de memoria asignada: " + proceso.getMemoriaAsignada());
+        }
+        System.out.println("-----------------------------------");
+    }
+
+    public void imprimirListaES() {
+
+        if (colaDeES.isEmpty()) {
+            System.out.println("No hay procesos en la cola de E/S.");
+            return;
+        }
+
+        System.out.println("Lista de procesos en cola de E/S:");
+        for (Proceso proceso : colaDeES) {
+            System.out.println("-----------------------------------");
+            System.out.println("Nombre del proceso: " + proceso.getNombre());
+            System.out.println("ID del proceso: " + proceso.getId());
+            System.out.println("Instrucciones pendientes: " + (proceso.getInstruccionesTotales() - proceso.getInstruccionesEjecutadas()));
+            System.out.println("Dirección de memoria asignada: " + proceso.getMemoriaAsignada());
+        }
+        System.out.println("-----------------------------------");
+    }
+
+    public void imprimirListaProcesosPreparados() {
+        if (colaDeProcesos.isEmpty()) {
+            System.out.println("No hay procesos en la cola de preparados.");
+            return;
+        }
+
+        System.out.println("Lista de procesos preparados:");
+        int index = 0;
+        for (Proceso proceso : colaDeProcesos) {
+            System.out.println("-----------------------------------");
+            if (index == 0) {
+                System.out.println(">> PROCESO ACTIVO <<");
+            }
+            System.out.println("Nombre del proceso: " + proceso.getNombre());
+            System.out.println("ID del proceso: " + proceso.getId());
+            System.out.println("Instrucciones pendientes: " + (proceso.getInstruccionesTotales() - proceso.getInstruccionesEjecutadas()));
+            System.out.println("Dirección de memoria asignada: " + proceso.getMemoriaAsignada());
+            index++;
+        }
+        System.out.println("-----------------------------------");
+    }
+
+    public void matarProcesoActual() {
+        if (colaDeProcesos.isEmpty()) {
+            System.out.println("No hay procesos en la cola.");
+            return;
+        }
+
+        Proceso procesoActivo = colaDeProcesos.poll(); // Accedemos y removemos el primer proceso de la cola de procesos.
+        memoriaUsada -= procesoActivo.getMemoriaAsignada(); // Liberamos la memoria que estaba utilizando el proceso.
+        procesosEliminados.add(procesoActivo); // Añadimos el proceso al registro de procesos eliminados.
+
+        System.out.println("El proceso " + procesoActivo.getNombre() + " ha sido eliminado.");
+        System.out.println("Instrucciones pendientes del proceso: " + (procesoActivo.getInstruccionesTotales() - procesoActivo.getInstruccionesEjecutadas()));
+    }
+
+    public void ejecutarInterrupcion() {
+        if (colaDeInterrupciones.isEmpty()) {
+            System.out.println("No hay procesos en la cola de interrupciones.");
+            return;
+        }
+
+        Proceso procesoInterrumpido = colaDeInterrupciones.poll(); // Accedemos y removemos el primer proceso de la cola de interrupciones.
+        colaDeProcesos.addLast(procesoInterrumpido);   // Añadimos el proceso al final de la cola de procesos preparados.
+
+        System.out.println("El proceso " + procesoInterrumpido.getNombre() + " ha sido movido de la cola de interrupciones a la cola de procesos preparados.");
+    }
+
 
     public void pasarAlProcesoSiguiente() {
         if (colaDeProcesos.isEmpty()) {
@@ -135,12 +283,41 @@ public class Simulador {
         System.out.println("Instrucciones ejecutadas: " + procesoActivo.getInstruccionesEjecutadas());
     }
 
-    
+    public void ejecutarEntradaYSalida() {
+        if (colaDeES.isEmpty()) {
+            System.out.println("No hay procesos en la cola de entrada y salida.");
+            return;
+        }
+
+        Proceso procesoDeES = colaDeES.poll(); // Accedemos y removemos el primer proceso de la cola de E/S.
+        colaDeProcesos.addLast(procesoDeES);   // Añadimos el proceso al final de la cola de procesos preparados.
+
+        System.out.println("El proceso " + procesoDeES.getNombre() + " ha sido movido de la cola de entrada y salida a la cola de procesos preparados.");
+    }
+
+
+
 
     // Métodos para manejar las otras acciones del simulador...
 
     public void salirDelPrograma() {
-        // Implementación del método para salir del programa...
+        Scanner scanner = new Scanner(System.in);
+
+        // Verificar si hay procesos en la cola de preparados
+        if (!colaDeProcesos.isEmpty()) {
+            System.out.println("Advertencia: Si decides salir, " + colaDeProcesos.size() + " procesos no se concluirán exitosamente.");
+            System.out.println("¿Deseas continuar? (Sí/No)");
+
+            String respuesta = scanner.nextLine().trim().toLowerCase();
+
+            if (respuesta.equals("no")) {
+                System.out.println("Regresando al menú principal...");
+                return;
+            }
+        }
+
+        System.out.println("Saliendo del programa. ¡Hasta luego!");
+        System.exit(0);
     }
 
     public LinkedList<Proceso> getColaDeProcesos() {
