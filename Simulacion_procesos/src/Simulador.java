@@ -309,18 +309,26 @@ public class Simulador {
         // Verificar si hay procesos en la cola de preparados
         if (!colaDeProcesos.isEmpty()) {
             System.out.println("Advertencia: Si decides salir, " + colaDeProcesos.size() + " procesos no se concluirán exitosamente.");
-            System.out.println("¿Deseas continuar? (Sí/No)");
 
-            String respuesta = scanner.nextLine().trim().toLowerCase();
+            while (true) {
+                System.out.println("¿Deseas continuar? (Sí/No)");
 
-            if (respuesta.equals("no")) {
-                System.out.println("Regresando al menú principal...");
-                return;
+                String respuesta = scanner.nextLine().trim().toLowerCase();
+
+                if (respuesta.equals("no")) {
+                    System.out.println("Regresando al menú principal...");
+                    return;
+                } else if (respuesta.equals("sí") || respuesta.equals("si")) {
+                    System.out.println("Saliendo del programa. ¡Hasta luego!");
+                    System.exit(0);
+                } else {
+                    System.out.println("Respuesta no reconocida. Por favor, ingresa 'Sí' o 'No'.");
+                }
             }
+        } else {
+            System.out.println("Saliendo del programa. ¡Hasta luego!");
+            System.exit(0);
         }
-
-        System.out.println("Saliendo del programa. ¡Hasta luego!");
-        System.exit(0);
     }
 
 }

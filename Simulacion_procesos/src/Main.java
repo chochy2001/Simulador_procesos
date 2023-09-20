@@ -1,8 +1,9 @@
-// Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
-// then press Enter. You can now see whitespace characters in your code.
 public class Main {
     public static void main(String[] args) {
         Simulador simulador = new Simulador();
-        simulador.mostrarMenu();
+
+        while(true){
+            simulador.mostrarMenu();
+        }
     }
 }
