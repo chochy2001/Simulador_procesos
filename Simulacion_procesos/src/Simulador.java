@@ -114,7 +114,12 @@ public class Simulador {
         }
 
         System.out.println("Lista de procesos pendientes de interrupción:");
-        for (Proceso proceso : colaDeInterrupciones) {
+        DatosProceso(colaDeInterrupciones);
+    }
+
+    //Metodo que muestra los datos de los procesos
+    public void DatosProceso(LinkedList<Proceso> colaProcesos) {
+        for (Proceso proceso : colaProcesos) {
             System.out.println("-----------------------------------");
             System.out.println("Nombre del proceso: " + proceso.getNombre());
             System.out.println("ID del proceso: " + proceso.getId());
@@ -132,14 +137,7 @@ public class Simulador {
         }
 
         System.out.println("Lista de procesos en cola de E/S:");
-        for (Proceso proceso : colaDeES) {
-            System.out.println("-----------------------------------");
-            System.out.println("Nombre del proceso: " + proceso.getNombre());
-            System.out.println("ID del proceso: " + proceso.getId());
-            System.out.println("Instrucciones pendientes: " + (proceso.getInstruccionesTotales() - proceso.getInstruccionesEjecutadas()));
-            System.out.println("Dirección de memoria asignada: " + proceso.getMemoriaAsignada());
-        }
-        System.out.println("-----------------------------------");
+        DatosProceso(colaDeES);
     }
 
     public void imprimirListaProcesosPreparados() {
@@ -155,6 +153,8 @@ public class Simulador {
             if (index == 0) {
                 System.out.println(">> PROCESO ACTIVO <<");
             }
+
+            //Se dejo asi y no se uso la otra funcion por que se muestra el proceso activo
             System.out.println("Nombre del proceso: " + proceso.getNombre());
             System.out.println("ID del proceso: " + proceso.getId());
             System.out.println("Instrucciones pendientes: " + (proceso.getInstruccionesTotales() - proceso.getInstruccionesEjecutadas()));
@@ -276,6 +276,7 @@ public class Simulador {
 
         Proceso procesoActivo = colaDeProcesos.peekFirst(); // Accedemos al primer proceso de la cola, sin eliminarlo.
 
+        //Se dejo asi por que solo se muestra un proceso, el que es el activo
         System.out.println("Información del proceso activo:");
         System.out.println("Nombre del proceso: " + procesoActivo.getNombre());
         System.out.println("ID único: " + procesoActivo.getId());
