@@ -15,9 +15,6 @@ public class Proceso {
         this.memoriaAsignada = posiblesMemorias[new Random().nextInt(4)];
     }
 
-    // Getter y Setter correspondientes para cada propiedad...
-    // Métodos adicionales como 'ejecutarInstrucciones' y 'instruccionesRestantes'...
-
 
     public String getNombre() {
         return nombre;
