@@ -29,6 +29,7 @@ public class Simulador {
             System.out.println("12. Salir del programa");
 
             int seleccion = scanner.nextInt();
+            scanner.nextLine();
 
             switch (seleccion) {
                 case 1:
@@ -251,7 +252,7 @@ public class Simulador {
 
     public void crearProceso() {
         System.out.print("Escribe el nombre del nuevo proceso: ");
-        String nombre = scanner.next();
+        String nombre = scanner.nextLine();
 
         Proceso nuevoProceso = new Proceso(nombre);
 
@@ -261,7 +262,7 @@ public class Simulador {
             colaDeProcesos.addLast(nuevoProceso);  // Agregar el proceso a la cola de procesos.
             memoriaUsada += nuevoProceso.getMemoriaAsignada();  // Incrementar la memoria usada.
 
-            System.out.println("Proceso " + nombre + " creado con ID: " + nuevoProceso.getId());
+            System.out.println("Proceso \"" + nombre + "\" creado con ID: " + nuevoProceso.getId());
             System.out.println("Instrucciones: " + nuevoProceso.getInstruccionesTotales());
             System.out.println("Memoria asignada: " + nuevoProceso.getMemoriaAsignada() + " localidades");
         } else {
