@@ -1,4 +1,5 @@
 import java.util.LinkedList;
+import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -28,49 +29,30 @@ public class Simulador {
             System.out.println("11. Ver estado actual del sistema");
             System.out.println("12. Salir del programa");
 
-            int seleccion = scanner.nextInt();
-            scanner.nextLine();
-
-            switch (seleccion) {
-                case 1:
-                    crearProceso();
-                    break;
-                case 2:
-                    verProcesoActivo();
-                    break;
-                case 3:
-                    ejecutarProcesoActual();
-                    break;
-                case 4:
-                    pasarAlProcesoSiguiente();
-                    break;
-                case 5:
-                    ejecutarEntradaYSalida();
-                    break;
-                case 6:
-                    ejecutarInterrupcion();
-                    break;
-                case 7:
-                    matarProcesoActual();
-                    break;
-                case 8:
-                    imprimirListaProcesosPreparados();
-                    break;
-                case 9:
-                    imprimirListaES();
-                    break;
-                case 10:
-                    imprimirProcesosPendientesInterrupcion();
-                    break;
-                case 11:
-                    verEstadoActualSistema();
-                    break;
-                case 12:
-                    salirDelPrograma();
-                    continuar = false;
-                    break;
-                default:
-                    System.out.println("Opción no válida. Intente nuevamente.");
+            try {
+                int seleccion = scanner.nextInt();
+                scanner.nextLine(); // consume newline
+                switch (seleccion) {
+                    case 1 -> crearProceso();
+                    case 2 -> verProcesoActivo();
+                    case 3 -> ejecutarProcesoActual();
+                    case 4 -> pasarAlProcesoSiguiente();
+                    case 5 -> ejecutarEntradaYSalida();
+                    case 6 -> ejecutarInterrupcion();
+                    case 7 -> matarProcesoActual();
+                    case 8 -> imprimirListaProcesosPreparados();
+                    case 9 -> imprimirListaES();
+                    case 10 -> imprimirProcesosPendientesInterrupcion();
+                    case 11 -> verEstadoActualSistema();
+                    case 12 -> {
+                        salirDelPrograma();
+                        continuar = false;
+                    }
+                    default -> System.out.println("Opción no válida. Intente nuevamente.");
+                }
+            }catch (InputMismatchException e){
+                System.out.println("Por favor, introduce un número válido.");
+                scanner.nextLine();
             }
         }
     }
