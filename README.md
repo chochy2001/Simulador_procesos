@@ -17,6 +17,7 @@ Este proyecto simula la administración y ejecución de procesos en un sistema o
 1. Clona el repositorio en tu máquina local.
 2. Compila y ejecuta el archivo `Main.java`.
 3. Sigue las instrucciones en la consola para interactuar con el simulador.
+4. Video demostración del funcionamiento https://youtu.be/Zp9mvQQ93h0
 
 ## Contribuciones
 
