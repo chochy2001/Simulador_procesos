@@ -23,7 +23,7 @@ Este proyecto simula la administración y ejecución de procesos en un sistema o
 
 Si deseas contribuir al proyecto, realiza un fork del repositorio, efectúa tus cambios y envía un pull request.
 
-## Acerca del autor
+## Acerca de los autores
 
-El proyecto fue desarrollado por Jorge Salgado Miranda, profesor en línea en Udemy, CEO de CAPDESIS, y apasionado por la tecnología. Estudiante de ingeniería en computación en la UNAM.
+El proyecto fue desarrollado por Jorge Salgado Miranda y Flores Chávez Marcos Gabriel.
 
