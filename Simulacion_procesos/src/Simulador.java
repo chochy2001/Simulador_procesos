@@ -1,7 +1,4 @@
-import java.util.LinkedList;
-import java.util.InputMismatchException;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class Simulador {
     private final LinkedList<Proceso> colaDeProcesos = new LinkedList<>();
@@ -11,6 +8,8 @@ public class Simulador {
     private final LinkedList<Proceso> procesosFinalizados = new LinkedList<>();
     private int memoriaUsada = 0;
     private final Scanner scanner = new Scanner(System.in);
+    //Creamos instancia de Memoria en Simulador con 1024 localidades (Establecidos por la practica)
+    private final Memoria memoria = new Memoria(1024);
 
     public void mostrarMenu() {
         boolean continuar = true;
@@ -28,6 +27,9 @@ public class Simulador {
             System.out.println("10. Imprimir procesos pendientes de E/S");
             System.out.println("11. Ver estado actual del sistema");
             System.out.println("12. Salir del programa");
+            System.out.println("13. Ver estado de la memoria");
+            System.out.println("14. Desfragmentar Memoria");
+
 
             try {
                 int seleccion = scanner.nextInt();
@@ -48,6 +50,8 @@ public class Simulador {
                         salirDelPrograma();
                         continuar = false;
                     }
+                    case 13 -> verEstadoDeLaMemoria();
+                    case 14 -> DesfragmentarMemoria();
                     default -> System.out.println("Opción no válida. Intente nuevamente.");
                 }
             }catch (InputMismatchException e){
@@ -55,6 +59,44 @@ public class Simulador {
                 scanner.nextLine();
             }
         }
+    }
+
+    private void DesfragmentarMemoria() {
+        memoria.desfragmentar();
+        System.out.println("Memoria desfragmentada.");
+    }
+
+    private void verEstadoDeLaMemoria() {
+        System.out.println("===== Estado de la Memoria =====");
+
+        // Mostrar la lista de localidades y qué proceso está usando cada localidad
+        System.out.println("Localidades de memoria:");
+        for (int i = 0; i < memoria.localidades.length; i++) {
+            if (memoria.localidades[i] == null) {
+                System.out.printf("Localidad %d: Hueco%n", i);
+            } else {
+                System.out.printf("Localidad %d: Proceso ID %d%n", i, memoria.localidades[i]);
+            }
+        }
+        System.out.println("------------------");
+
+        // Mostrar información de cada proceso y hueco en la cola
+        for (Proceso nodo : colaDeProcesos) {
+            if (nodo.esHueco()) {
+                System.out.printf("Hueco - Comienza en: %d, Tamaño: %d%n", nodo.getId(), nodo.getMemoriaAsignada());
+            } else {
+                System.out.printf("ID Proceso %d,nombre: %s , Memoria Asignada: %d%n", nodo.getId(), nodo.getNombre(), nodo.getMemoriaAsignada());
+                System.out.printf("Páginas asignadas: %s%n", nodo.getTablaDePaginas());
+            }
+        }
+        System.out.println("------------------");
+
+        // Mostrar la memoria total, disponible y usada
+        System.out.printf("Memoria Total: %d localidades%n", memoria.localidades.length);
+        System.out.printf("Memoria Disponible: %d localidades%n", memoria.getMemoriaDisponible());
+        System.out.printf("Memoria Usada: %d localidades%n", memoria.localidades.length - memoria.getMemoriaDisponible());
+
+        System.out.println("==============================");
     }
 
 
@@ -154,14 +196,16 @@ public class Simulador {
             return;
         }
 
-        Proceso procesoActivo = colaDeProcesos.poll(); // Accedemos y removemos el primer proceso de la cola de procesos.
-        memoriaUsada -= procesoActivo.getMemoriaAsignada(); // Liberamos la memoria que estaba utilizando el proceso.
-        procesosEliminados.add(procesoActivo); // Añadimos el proceso al registro de procesos eliminados.
+        Proceso procesoActivo = colaDeProcesos.poll();
+        memoriaUsada -= procesoActivo.getMemoriaAsignada();
+        procesosEliminados.add(procesoActivo);
+        memoria.liberarMemoria(procesoActivo);
+        procesoActivo.setEsHueco(true);  // Establece el proceso como hueco.
+        colaDeProcesos.add(procesoActivo);  // Añade el proceso (ahora hueco) de nuevo a la cola.
 
         System.out.println("El proceso " + procesoActivo.getNombre() + " ha sido eliminado.");
         System.out.println("Instrucciones pendientes del proceso: " + (procesoActivo.getInstruccionesTotales() - procesoActivo.getInstruccionesEjecutadas()));
     }
-
     public void ejecutarInterrupcion() {
         if (colaDeInterrupciones.isEmpty()) {
             System.out.println("No hay procesos en la cola de interrupciones.");
@@ -236,19 +280,28 @@ public class Simulador {
         System.out.print("Escribe el nombre del nuevo proceso: ");
         String nombre = scanner.nextLine();
 
-        Proceso nuevoProceso = new Proceso(nombre);
+        Proceso nuevoProceso = new Proceso(nombre, false);
+        List<Integer> paginasAsignadas = memoria.asignarMemoria(nuevoProceso);
 
-        // Checar si hay memoria suficiente para el nuevo proceso.
-        int memoriaTotal = 2048;
-        if ((memoriaUsada + nuevoProceso.getMemoriaAsignada()) <= memoriaTotal) {
-            colaDeProcesos.addLast(nuevoProceso);  // Agregar el proceso a la cola de procesos.
-            memoriaUsada += nuevoProceso.getMemoriaAsignada();  // Incrementar la memoria usada.
+        // Checar si hay memoria suficiente para el nuevo proceso
+        if (!paginasAsignadas.isEmpty()) {
+            // Actualizar la memoria disponible y la memoria usada
+            int memoriaDisponible = memoria.getMemoriaDisponible();
+            int memoriaRequerida = nuevoProceso.getMemoriaAsignada();
+            memoriaUsada += memoriaRequerida;
 
-            System.out.println("Proceso \"" + nombre + "\" creado con ID: " + nuevoProceso.getId());
-            System.out.println("Instrucciones: " + nuevoProceso.getInstruccionesTotales());
-            System.out.println("Memoria asignada: " + nuevoProceso.getMemoriaAsignada() + " localidades");
+            // Agregar el proceso a la cola de procesos
+            colaDeProcesos.addLast(nuevoProceso);
+
+            // Imprimir la información del proceso creado
+            System.out.printf("Proceso \"%s\" creado con ID: %d%n", nombre, nuevoProceso.getId());
+            System.out.printf("Instrucciones: %d%n", nuevoProceso.getInstruccionesTotales());
+            System.out.printf("Memoria asignada: %d localidades%n", memoriaRequerida);
+            System.out.printf("Memoria disponible: %d localidades%n", memoriaDisponible);
+            System.out.printf("Páginas asignadas: %s%n", paginasAsignadas);
         } else {
-            System.out.println("No hay suficiente memoria para crear el proceso.");
+            System.out.printf("No hay suficiente memoria disponible para el proceso %s con ID %d%nrequiere %d localidades de memoria y hay %d localidades disponibles%n", nombre, nuevoProceso.getId(), nuevoProceso.getMemoriaAsignada(), memoria.getMemoriaDisponible());
+            System.out.println("Es necesario matar o ejecutar un proceso para liberar memoria.\n\n");
         }
     }
 
@@ -260,12 +313,23 @@ public class Simulador {
 
         Proceso procesoActivo = colaDeProcesos.peekFirst(); // Accedemos al primer proceso de la cola, sin eliminarlo.
 
-        //Se dejo asi por que solo se muestra un proceso, el que es el activo
+        // Información básica del proceso
         System.out.println("Información del proceso activo:");
         System.out.println("Nombre del proceso: " + procesoActivo.getNombre());
         System.out.println("ID único: " + procesoActivo.getId());
         System.out.println("Instrucciones totales: " + procesoActivo.getInstruccionesTotales());
         System.out.println("Instrucciones ejecutadas: " + procesoActivo.getInstruccionesEjecutadas());
+
+        // Información de la tabla de páginas
+        List<Integer> tablaDePaginas = procesoActivo.getTablaDePaginas();
+        System.out.println("Tabla de páginas del proceso:");
+        if (tablaDePaginas.isEmpty()) {
+            System.out.println("No hay páginas asignadas para este proceso.");
+        } else {
+            for (int i = 0; i < tablaDePaginas.size(); i++) {
+                System.out.printf("Página %d: Localidad %d%n", i+1, tablaDePaginas.get(i));
+            }
+        }
     }
 
     public void ejecutarEntradaYSalida() {
